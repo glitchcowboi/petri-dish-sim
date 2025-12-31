@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petri Dish Lab v1.0</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Press Start 2P', -apple-system, BlinkMacSystemFont, 'Chicago', 'Geneva', monospace;
+            background: #666666;
+            background-image: 
+                repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(0,0,0,.03) 2px, rgba(0,0,0,.03) 4px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .computer-window {
+            background: white;
+            border: 2px solid black;
+            box-shadow: 4px 4px 0px rgba(0,0,0,0.3);
+            max-width: 900px;
+            width: 100%;
+        }
+        
+        .title-bar {
+            background: white;
+            border-bottom: 2px solid black;
+            padding: 10px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+        
+        .title-text {
+            display: flex;
+            align-items: center;
+        }
+        
+        .title-buttons {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .close-box {
+            width: 14px;
+            height: 14px;
+            border: 2px solid black;
+            background: white;
+            cursor: pointer;
+        }
+        
+        .close-box:active {
+            background: black;
+        }
+        
+        .window-content {
+            padding: 12px;
+            background: white;
+        }
+        
+        .info-bar {
+            background: black;
+            color: white;
+            border: 2px solid black;
+            padding: 6px;
+            margin-bottom: 12px;
+            font-size: 8px;
+            text-align: center;
+        }
+        
+        .main-container {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .canvas-container {
+            background: white;
+            border: 2px solid black;
+            padding: 4px;
+            width: fit-content;
+        }
+        
+        #petriDish {
+            display: block;
+            background: #1a1a1a;
+            border: 1px solid black;
+            cursor: crosshair;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+        
+        .sidebar {
+            width: 200px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: auto;
+        }
+        
+        .panel {
+            background: white;
+            border: 2px solid black;
+        }
+        
+        .panel-title {
+            background: black;
+            color: white;
+            font-size: 9px;
+            padding: 4px 6px;
+            font-weight: bold;
+            border-bottom: 2px solid black;
+            text-align: center;
+        }
+        
+        /* About Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        .modal-window {
+            background: white;
+            border: 2px solid black;
+            box-shadow: 4px 4px 0px rgba(0,0,0,0.3);
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .modal-title-bar {
+            background: white;
+            border-bottom: 2px solid black;
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+        }
+        
+        .modal-close {
+            width: 14px;
+            height: 14px;
+            border: 2px solid black;
+            background: white;
+            cursor: pointer;
+        }
+        
+        .modal-close:active {
+            background: black;
+        }
+        
+        .modal-content {
+            padding: 12px;
+            overflow-y: auto;
+            font-size: 9px;
+            line-height: 1.6;
+        }
+        
+        .ingredient-info {
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid black;
+        }
+        
+        .ingredient-info:last-child {
+            border-bottom: none;
+        }
+        
+        .ingredient-info h3 {
+            font-size: 10px;
+            margin-bottom: 4px;
+        }
+        
+        .panel-content {
+            padding: 6px;
+        }
+        
+        .ingredient {
+            background: white;
+            border: 2px solid black;
+            padding: 6px;
+            margin-bottom: 6px;
+            cursor: pointer;
+            font-size: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .ingredient:hover {
+            background: black;
+            color: white;
+        }
+        
+        .ingredient:active {
+            background: #999;
+        }
+        
+        .ingredient-icon {
+            font-size: 16px;
+            filter: grayscale(1) contrast(2);
+        }
+        
+        .button {
+            background: white;
+            border: 2px solid black;
+            padding: 6px 8px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 8px;
+            cursor: pointer;
+            margin-bottom: 6px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .button:hover {
+            background: black;
+            color: white;
+        }
+        
+        .button:active {
+            background: #999;
+        }
+        
+        .dragging {
+            position: fixed;
+            pointer-events: none;
+            z-index: 1000;
+            font-size: 32px;
+            filter: grayscale(1) contrast(2);
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                font-size: 8px;
+            }
+            .main-container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="computer-window">
+        <div class="title-bar">
+            <div class="title-text">
+                <span>PETRI DISH LAB v1.0</span>
+            </div>
+            <div class="title-buttons">
+                <div class="close-box"></div>
+            </div>
+        </div>
+        
+        <div class="window-content">
+            <div class="info-bar">
+                Drag ingredients into the dish and watch them grow
+            </div>
+            
+            <div class="main-container">
+                <div class="canvas-container">
+                    <canvas id="petriDish" width="600" height="600"></canvas>
+                </div>
+                
+                <div class="sidebar">
+                    <div class="panel">
+                        <div class="panel-title">Ingredients</div>
+                        <div class="panel-content">
+                            <div class="ingredient" data-type="spore">
+                                <span class="ingredient-icon">🍄</span>
+                                <span>Spore</span>
+                            </div>
+                            <div class="ingredient" data-type="crystal">
+                                <span class="ingredient-icon">💎</span>
+                                <span>Crystal</span>
+                            </div>
+                            <div class="ingredient" data-type="bacteria">
+                                <span class="ingredient-icon">🦠</span>
+                                <span>Bacteria</span>
+                            </div>
+                            <div class="ingredient" data-type="algae">
+                                <span class="ingredient-icon">🌿</span>
+                                <span>Algae</span>
+                            </div>
+                            <div class="ingredient" data-type="sparkle">
+                                <span class="ingredient-icon">✨</span>
+                                <span>Sparkle</span>
+                            </div>
+                            <div class="ingredient" data-type="blob">
+                                <span class="ingredient-icon">🫧</span>
+                                <span>Blob</span>
+                            </div>
+                            <div class="ingredient" data-type="slime">
+                                <span class="ingredient-icon">🧫</span>
+                                <span>Slime</span>
+                            </div>
+                            <div class="ingredient" data-type="nematode">
+                                <span class="ingredient-icon">🪱</span>
+                                <span>Nematode</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="panel">
+                        <div class="panel-title">Controls</div>
+                        <div class="panel-content">
+                            <button class="button" onclick="clearDish()">Clear</button>
+                            <button class="button" onclick="pauseToggle()">Pause</button>
+                            <button class="button" onclick="speedUp()">Speed 1x</button>
+                            <button class="button" onclick="recordGif()" id="recordBtn">Record Findings</button>
+                            <button class="button" onclick="showAbout()">About</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- About Modal -->
+    <div class="modal-overlay" id="aboutModal">
+        <div class="modal-window">
+            <div class="modal-title-bar">
+                <span>About Ingredients</span>
+                <div class="modal-close" onclick="closeAbout()"></div>
+            </div>
+            <div class="modal-content">
+                <div class="ingredient-info">
+                    <h3>🍄 Spore</h3>
+                    <p>Grows in a mycelium pattern with straight lines in cardinal directions. Continuously releases floating spore particles that drift and fade away. Reaches medium size and creates a misty atmospheric effect.</p>
+                </div>
+                
+                <div class="ingredient-info">
+                    <h3>💎 Crystal</h3>
+                    <p>Forms beautiful fractal square spiral patterns inspired by bismuth crystals. Grows with sharp 90-degree angles in geometric formations. Each crystal has 1-6 branches that spiral outward creating unique snowflake-like structures.</p>
+                </div>
+                
+                <div class="ingredient-info">
+                    <h3>🦠 Bacteria</h3>
+                    <p>Fast-growing blobby organism that moves like a lava lamp once it reaches sufficient size. Drifts smoothly around the dish with gentle pulsating movements. Creates organic, flowing patterns with pink and purple colors.</p>
+                </div>
+                
+                <div class="ingredient-info">
+                    <h3>🌿 Algae</h3>
+                    <p>Grows in cellular compartments like biological tissue. Forms visible cell walls and boundaries between individual cells. Smoothly fades between neon green and deep blue colors, creating a bioluminescent effect.</p>
+                </div>
+                
+                <div class="ingredient-info">
+                    <h3>✨ Sparkle</h3>
+                    <p>Grows in star-like patterns with a magical pulsating glow. Each sparkle blinks independently at its own rhythm creating a twinkling starfield effect. The glow has soft faded edges and cycles slowly.</p>
+                </div>
+                
+                <div class="ingredient-info">
+                    <h3>🫧 Blob</h3>
+                    <p>Spreads in soft amorphous patterns while continuously cycling through rainbow colors. Features enhanced shimmer effects with frequent white sparkles. Creates a mesmerizing RGB fade that shifts smoothly through the spectrum.</p>
+                </div>
+                
+                <div class="ingredient-info">
+                    <h3>🧫 Slime Mold</h3>
+                    <p>The fastest-growing organism that creates sprawling web-like networks. Older trails slowly fade away as new growth continues, creating a trailing effect. Reaches the largest maximum size and explores the dish in wandering patterns.</p>
+                </div>
+                
+                <div class="ingredient-info">
+                    <h3>🪱 Nematode</h3>
+                    <p>A wiggling worm creature that continuously moves around the dish. Each nematode starts with a random color and smoothly shifts through the RGB spectrum as it moves. Wraps around the edges of the dish and creates mesmerizing rainbow trails.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('petriDish');
+        const ctx = canvas.getContext('2d');
+        
+        // Simulation state
+        let organisms = [];
+        let particles = [];
+        let isPaused = false;
+        let speed = 1;
+        let draggedIcon = null;
+        let frameCount = 0;
+        
+        // Organism types with their properties
+        const organismTypes = {
+            spore: {
+                color: '#ff6b9d',
+                secondaryColor: '#c44569',
+                growthRate: 0.3,
+                spreadRate: 0.05,
+                pattern: 'mycelium',
+                emoji: '🍄',
+                sporeRelease: true,
+                maxSize: 800
+            },
+            crystal: {
+                color: '#4facfe',
+                secondaryColor: '#00f2fe',
+                growthRate: 0.2,
+                spreadRate: 0.02,
+                pattern: 'bismuth',
+                emoji: '💎',
+                stepSize: 1,
+                maxSize: 1200
+            },
+            bacteria: {
+                color: '#f093fb',
+                secondaryColor: '#f5576c',
+                growthRate: 0.5,
+                spreadRate: 0.08,
+                pattern: 'lavaLamp',
+                emoji: '🦠',
+                maxSize: 1200
+            },
+            algae: {
+                color: '#39ff14',
+                secondaryColor: '#0047ab',
+                growthRate: 0.4,
+                spreadRate: 0.06,
+                pattern: 'cellular',
+                emoji: '🌿',
+                maxSize: 800,
+                cellSize: 8,
+                smoothFade: true
+            },
+            sparkle: {
+                color: '#ffd89b',
+                secondaryColor: '#19547b',
+                growthRate: 0.25,
+                spreadRate: 0.04,
+                pattern: 'star',
+                emoji: '✨',
+                blinkSpeed: 90,
+                blinkOffset: 0,
+                maxSize: 1200
+            },
+            blob: {
+                color: '#a8edea',
+                secondaryColor: '#fed6e3',
+                growthRate: 0.35,
+                spreadRate: 0.07,
+                pattern: 'blob',
+                emoji: '🫧',
+                maxSize: 1000,
+                rgbFade: true
+            },
+            slime: {
+                color: '#feca57',
+                secondaryColor: '#ee5a6f',
+                growthRate: 0.6,
+                spreadRate: 0.15,
+                pattern: 'slimeMold',
+                emoji: '🧫',
+                fadeRate: 0.998,
+                maxSize: 1800
+            },
+            nematode: {
+                color: '#ff0000',
+                secondaryColor: '#00ff00',
+                growthRate: 0.0,
+                spreadRate: 0.0,
+                pattern: 'worm',
+                emoji: '🪱',
+                maxSize: 30,
+                rgbShift: true,
+                wormSpeed: 2
+            }
+        };
+        
+        // Organism class
+        class Organism {
+            constructor(x, y, type) {
+                this.x = x;
+                this.y = y;
+                this.type = type;
+                this.props = organismTypes[type];
+                this.age = 0;
+                this.size = 1;
+                // Use organism-specific max size if defined, otherwise use default range
+                this.maxSize = this.props.maxSize || (800 + Math.random() * 1000);
+                this.pixels = [{x: Math.floor(x), y: Math.floor(y), age: 0, alpha: 1}];
+                this.color = this.props.color;
+                this.growthDirection = {x: 0, y: 0};
+                this.centerOfMass = {x: x, y: y};
+                
+                // Random blink offset for sparkles
+                if (this.type === 'sparkle') {
+                    this.blinkOffset = Math.random() * 200;
+                }
+                
+                // Worm setup for nematodes
+                if (this.type === 'nematode') {
+                    // Random starting color
+                    this.baseHue = Math.random() * 360;
+                    this.rgbSpeed = 0.5 + Math.random() * 1;
+                    
+                    // Worm segments
+                    this.wormLength = 20 + Math.floor(Math.random() * 15);
+                    this.segments = [];
+                    for (let i = 0; i < this.wormLength; i++) {
+                        this.segments.push({
+                            x: Math.floor(x),
+                            y: Math.floor(y)
+                        });
+                    }
+                    
+                    // Movement
+                    this.direction = Math.random() * Math.PI * 2;
+                    this.wigglePhase = Math.random() * Math.PI * 2;
+                    this.pixels = this.segments.map(seg => ({x: seg.x, y: seg.y, age: 0, alpha: 1}));
+                    
+                    // Trail particles
+                    this.trail = [];
+                }
+                
+                // For bismuth crystal growth
+                if (this.props.pattern === 'bismuth') {
+                    // Start with a filled 3x3 square center to avoid problematic shapes
+                    for (let dx = -1; dx <= 1; dx++) {
+                        for (let dy = -1; dy <= 1; dy++) {
+                            const px = Math.floor(x) + dx;
+                            const py = Math.floor(y) + dy;
+                            if (px >= 0 && px < 600 && py >= 0 && py < 600) {
+                                this.pixels.push({x: px, y: py, age: 0, alpha: 1});
+                            }
+                        }
+                    }
+                    
+                    // Random number of branches: 1, 2, 3, 5, or 6 (never 4)
+                    const branchOptions = [1, 2, 3, 5, 6];
+                    const numBranches = branchOptions[Math.floor(Math.random() * branchOptions.length)];
+                    
+                    this.branches = [];
+                    const angleStep = (Math.PI * 2) / numBranches;
+                    const startAngle = Math.random() * Math.PI * 2; // Random rotation
+                    
+                    for (let i = 0; i < numBranches; i++) {
+                        const angle = startAngle + (angleStep * i);
+                        const startDist = 2;
+                        const startX = Math.floor(x + Math.cos(angle) * startDist);
+                        const startY = Math.floor(y + Math.sin(angle) * startDist);
+                        
+                        this.branches.push({
+                            x: startX,
+                            y: startY,
+                            angle: angle,
+                            length: 0
+                        });
+                    }
+                    
+                    this.stepPhase = 0;
+                    this.currentStep = 3;
+                }
+            }
+            
+            update() {
+                // Nematode worm movement
+                if (this.props.pattern === 'worm' && this.segments) {
+                    // Update direction with smooth changes and wiggle
+                    this.direction += (Math.random() - 0.5) * 0.15;
+                    this.wigglePhase += 0.2;
+                    
+                    // Calculate head position with wiggle
+                    const wiggle = Math.sin(this.wigglePhase) * 0.5;
+                    const moveX = Math.cos(this.direction + wiggle) * this.props.wormSpeed;
+                    const moveY = Math.sin(this.direction + wiggle) * this.props.wormSpeed;
+                    
+                    let newHeadX = this.segments[0].x + moveX;
+                    let newHeadY = this.segments[0].y + moveY;
+                    
+                    // Wrap around edges properly
+                    if (newHeadX < 0) newHeadX += canvas.width;
+                    if (newHeadX >= canvas.width) newHeadX -= canvas.width;
+                    if (newHeadY < 0) newHeadY += canvas.height;
+                    if (newHeadY >= canvas.height) newHeadY -= canvas.height;
+                    
+                    // Create trail particles from tail
+                    if (this.age % 2 === 0) {
+                        const tailSegment = this.segments[this.segments.length - 1];
+                        const hue = this.baseHue % 360;
+                        
+                        // Add sparkle particle
+                        this.trail.push({
+                            x: tailSegment.x + (Math.random() - 0.5) * 2,
+                            y: tailSegment.y + (Math.random() - 0.5) * 2,
+                            life: 18 + Math.random() * 12,
+                            maxLife: 30,
+                            hue: hue + (Math.random() - 0.5) * 30,
+                            sparkle: Math.random() > 0.6
+                        });
+                    }
+                    
+                    // Update trail particles
+                    this.trail = this.trail.filter(p => {
+                        p.life--;
+                        return p.life > 0;
+                    });
+                    
+                    // Move segments - each follows the one ahead
+                    for (let i = this.segments.length - 1; i > 0; i--) {
+                        this.segments[i].x = this.segments[i - 1].x;
+                        this.segments[i].y = this.segments[i - 1].y;
+                    }
+                    
+                    this.segments[0].x = newHeadX;
+                    this.segments[0].y = newHeadY;
+                    
+                    // Update pixels to match segments with wrapping
+                    this.pixels = this.segments.map(seg => {
+                        let x = Math.floor(seg.x);
+                        let y = Math.floor(seg.y);
+                        
+                        // Ensure pixels stay in bounds
+                        if (x < 0) x += canvas.width;
+                        if (x >= canvas.width) x -= canvas.width;
+                        if (y < 0) y += canvas.height;
+                        if (y >= canvas.height) y -= canvas.height;
+                        
+                        return {x, y, age: 0, alpha: 1};
+                    });
+                    
+                    this.x = this.segments[0].x;
+                    this.y = this.segments[0].y;
+                }
+                
+                // Bacteria lava lamp movement - continuous movement independent of growth
+                if (this.props.pattern === 'lavaLamp' && this.pixels.length > 20) {
+                    // Initialize target direction if not exists
+                    if (!this.targetDirection) {
+                        const angle = Math.random() * Math.PI * 2;
+                        this.targetDirection = {
+                            x: Math.cos(angle) * 0.3,
+                            y: Math.sin(angle) * 0.3
+                        };
+                        this.growthDirection = {x: 0, y: 0};
+                    }
+                    
+                    // Smoothly interpolate towards target direction every frame
+                    const lerp = 0.05;
+                    this.growthDirection.x += (this.targetDirection.x - this.growthDirection.x) * lerp;
+                    this.growthDirection.y += (this.targetDirection.y - this.growthDirection.y) * lerp;
+                    
+                    // Randomly change target direction
+                    if (Math.random() < 0.03) {
+                        const angle = Math.random() * Math.PI * 2;
+                        const strength = 0.2 + Math.random() * 0.3;
+                        this.targetDirection = {
+                            x: Math.cos(angle) * strength,
+                            y: Math.sin(angle) * strength
+                        };
+                    }
+                    
+                    // Add some "breathing" pulsation with varied frequency
+                    const breathSpeed = 50 + Math.sin(this.age * 0.01) * 20;
+                    const breathPhase = (this.age % breathSpeed) / breathSpeed;
+                    const breathe = Math.sin(breathPhase * Math.PI * 2) * 0.08;
+                    
+                    // Calculate center of mass
+                    const centerX = this.pixels.reduce((sum, p) => sum + p.x, 0) / this.pixels.length;
+                    const centerY = this.pixels.reduce((sum, p) => sum + p.y, 0) / this.pixels.length;
+                    
+                    // Add Perlin-like noise using multiple sine waves
+                    const noiseX = Math.sin(this.age * 0.05) * 0.08 + Math.sin(this.age * 0.03) * 0.05;
+                    const noiseY = Math.cos(this.age * 0.04) * 0.08 + Math.cos(this.age * 0.06) * 0.05;
+                    
+                    // Move all pixels together as a blob
+                    const newPixels = [];
+                    for (let pixel of this.pixels) {
+                        // Calculate direction from center for breathing effect
+                        const dx = pixel.x - centerX;
+                        const dy = pixel.y - centerY;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        
+                        let moveX = 0;
+                        let moveY = 0;
+                        
+                        // Combine directional drift with subtle breathing
+                        if (dist > 0) {
+                            // Breathing in/out from center
+                            const breathX = (dx / dist) * breathe;
+                            const breathY = (dy / dist) * breathe;
+                            
+                            // Combined movement with noise and per-pixel randomness
+                            const totalX = this.growthDirection.x + breathX + noiseX + (Math.random() - 0.5) * 0.12;
+                            const totalY = this.growthDirection.y + breathY + noiseY + (Math.random() - 0.5) * 0.12;
+                            
+                            moveX = Math.round(totalX);
+                            moveY = Math.round(totalY);
+                        }
+                        
+                        const newX = pixel.x + moveX;
+                        const newY = pixel.y + moveY;
+                        
+                        // Keep within bounds
+                        if (newX >= 0 && newX < canvas.width && newY >= 0 && newY < canvas.height) {
+                            newPixels.push({x: newX, y: newY, age: pixel.age || 0, alpha: pixel.alpha || 1});
+                        } else {
+                            // Keep old position if out of bounds
+                            newPixels.push(pixel);
+                        }
+                    }
+                    
+                    this.pixels = newPixels;
+                }
+            }
+            
+            grow() {
+                this.age++;
+                
+                // Age all pixels for slime mold fading
+                if (this.type === 'slime' && this.props.fadeRate) {
+                    this.pixels.forEach(pixel => {
+                        pixel.age++;
+                        pixel.alpha *= this.props.fadeRate;
+                    });
+                    // Remove very faded pixels
+                    this.pixels = this.pixels.filter(p => p.alpha > 0.05);
+                }
+                
+                // Spore release particles - continuous, independent of growth
+                if (this.props.sporeRelease && this.age % 20 === 0 && this.pixels.length > 0) {
+                    // Release spores from multiple random pixels
+                    const numReleasePoints = Math.min(3, Math.max(1, Math.floor(this.pixels.length / 30)));
+                    for (let i = 0; i < numReleasePoints; i++) {
+                        const randomPixel = this.pixels[Math.floor(Math.random() * this.pixels.length)];
+                        particles.push(new Particle(
+                            randomPixel.x, 
+                            randomPixel.y, 
+                            this.props.color,
+                            'spore'
+                        ));
+                    }
+                }
+                
+                if (this.age % Math.floor(2 / speed) !== 0) return;
+                if (this.size >= this.maxSize) return;
+                if (Math.random() > this.props.growthRate) return;
+                
+                // Lava lamp movement for bacteria
+                if (this.props.pattern === 'lavaLamp') {
+                    // Slowly change direction
+                    if (this.age % 20 === 0) {
+                        this.growthDirection = {
+                            x: (Math.random() - 0.5) * 2,
+                            y: (Math.random() - 0.5) * 2
+                        };
+                    }
+                }
+                
+                // Grow new pixels
+                const newPixels = [];
+                
+                if (this.props.pattern === 'bismuth') {
+                    // Bismuth crystal: fractal square spiral growth with variable branches
+                    let grewThisFrame = false;
+                    
+                    for (let branch of this.branches) {
+                        if (Math.random() < this.props.spreadRate * speed) {
+                            // Calculate direction based on angle
+                            const dx = Math.round(Math.cos(branch.angle));
+                            const dy = Math.round(Math.sin(branch.angle));
+                            
+                            // Grow in current direction
+                            const newX = branch.x + dx;
+                            const newY = branch.y + dy;
+                            
+                            if (newX >= 0 && newX < canvas.width && newY >= 0 && newY < canvas.height) {
+                                if (!this.pixels.some(p => p.x === newX && p.y === newY)) {
+                                    newPixels.push({x: newX, y: newY, age: 0, alpha: 1});
+                                    branch.x = newX;
+                                    branch.y = newY;
+                                    branch.length++;
+                                    grewThisFrame = true;
+                                    
+                                    // When branch reaches step length, turn 90 degrees and increase step size
+                                    if (branch.length >= this.currentStep) {
+                                        branch.length = 0;
+                                        branch.angle += Math.PI / 2; // Turn right 90 degrees
+                                        
+                                        this.stepPhase++;
+                                        // Every 2 turns, increase the step size (creates the square spiral)
+                                        if (this.stepPhase % 2 === 0) {
+                                            this.currentStep += 1;
+                                        }
+                                    }
+                                } else {
+                                    // Stuck - try jumping or creating new branch
+                                    if (!branch.stuckCounter) branch.stuckCounter = 0;
+                                    branch.stuckCounter++;
+                                    
+                                    if (branch.stuckCounter > 5) {
+                                        // Jump to a new position near the edge of the crystal
+                                        const edgePixels = this.pixels.filter(p => {
+                                            const neighbors = [
+                                                {dx: 1, dy: 0}, {dx: -1, dy: 0},
+                                                {dx: 0, dy: 1}, {dx: 0, dy: -1}
+                                            ];
+                                            return neighbors.some(n => 
+                                                !this.pixels.some(p2 => p2.x === p.x + n.dx && p2.y === p.y + n.dy)
+                                            );
+                                        });
+                                        
+                                        if (edgePixels.length > 0) {
+                                            const newStart = edgePixels[Math.floor(Math.random() * edgePixels.length)];
+                                            branch.x = newStart.x;
+                                            branch.y = newStart.y;
+                                            branch.angle = Math.random() * Math.PI * 2;
+                                            branch.length = 0;
+                                            branch.stuckCounter = 0;
+                                            grewThisFrame = true;
+                                        }
+                                    }
+                                }
+                            } else {
+                                // Hit boundary - turn around
+                                branch.angle += Math.PI / 2;
+                                branch.length = 0;
+                            }
+                        }
+                    }
+                    
+                    // If no growth happened and crystal is small, add a new branch
+                    if (!grewThisFrame && this.pixels.length < 100 && Math.random() < 0.1) {
+                        const edgePixels = this.pixels.filter(p => {
+                            const neighbors = [
+                                {dx: 1, dy: 0}, {dx: -1, dy: 0},
+                                {dx: 0, dy: 1}, {dx: 0, dy: -1}
+                            ];
+                            return neighbors.some(n => 
+                                !this.pixels.some(p2 => p2.x === p.x + n.dx && p2.y === p.y + n.dy)
+                            );
+                        });
+                        
+                        if (edgePixels.length > 0) {
+                            const newStart = edgePixels[Math.floor(Math.random() * edgePixels.length)];
+                            this.branches.push({
+                                x: newStart.x,
+                                y: newStart.y,
+                                angle: Math.random() * Math.PI * 2,
+                                length: 0,
+                                stuckCounter: 0
+                            });
+                        }
+                    }
+                } else if (this.props.pattern === 'slimeMold') {
+                    // Slime mold: web-like growth with random direction changes
+                    const tips = this.pixels.filter(p => p.age < 5);
+                    const growFrom = tips.length > 0 ? tips : this.pixels.slice(-10);
+                    
+                    for (let pixel of growFrom) {
+                        if (Math.random() < this.props.spreadRate * speed) {
+                            // Bias towards continuing in a direction
+                            const directions = [
+                                {dx: 2, dy: 0}, {dx: -2, dy: 0},
+                                {dx: 0, dy: 2}, {dx: 0, dy: -2},
+                                {dx: 1, dy: 1}, {dx: -1, dy: -1},
+                                {dx: 1, dy: -1}, {dx: -1, dy: 1}
+                            ];
+                            
+                            const direction = directions[Math.floor(Math.random() * directions.length)];
+                            const newX = pixel.x + direction.dx;
+                            const newY = pixel.y + direction.dy;
+                            
+                            if (newX >= 0 && newX < canvas.width && newY >= 0 && newY < canvas.height) {
+                                if (!this.pixels.some(p => p.x === newX && p.y === newY)) {
+                                    newPixels.push({x: newX, y: newY, age: 0, alpha: 1});
+                                }
+                            }
+                        }
+                    }
+                } else if (this.props.pattern === 'cellular') {
+                    // Cellular pattern for algae - creates cell-like compartments
+                    if (!this.cells) {
+                        this.cells = [{
+                            centerX: Math.floor(this.x),
+                            centerY: Math.floor(this.y),
+                            radius: 0,
+                            maxRadius: this.props.cellSize || 8
+                        }];
+                    }
+                    
+                    // Grow existing cells
+                    for (let cell of this.cells) {
+                        if (cell.radius < cell.maxRadius) {
+                            // Grow cell in a circular pattern
+                            const currentRadius = Math.floor(cell.radius);
+                            for (let angle = 0; angle < Math.PI * 2; angle += 0.5) {
+                                const x = Math.floor(cell.centerX + Math.cos(angle) * currentRadius);
+                                const y = Math.floor(cell.centerY + Math.sin(angle) * currentRadius);
+                                
+                                if (x >= 0 && x < canvas.width && y >= 0 && y < canvas.height) {
+                                    if (!this.pixels.some(p => p.x === x && p.y === y)) {
+                                        newPixels.push({x: x, y: y, age: 0, alpha: 1, cellId: this.cells.indexOf(cell)});
+                                    }
+                                }
+                            }
+                            cell.radius += 0.5;
+                        }
+                    }
+                    
+                    // Create new cells at edges when existing cells are mature
+                    if (Math.random() < this.props.spreadRate * speed) {
+                        const matureCells = this.cells.filter(c => c.radius >= c.maxRadius * 0.7);
+                        if (matureCells.length > 0) {
+                            const parentCell = matureCells[Math.floor(Math.random() * matureCells.length)];
+                            
+                            // Place new cell adjacent to parent cell
+                            const angle = Math.random() * Math.PI * 2;
+                            const distance = parentCell.maxRadius + (this.props.cellSize || 8) * 0.5;
+                            const newCenterX = Math.floor(parentCell.centerX + Math.cos(angle) * distance);
+                            const newCenterY = Math.floor(parentCell.centerY + Math.sin(angle) * distance);
+                            
+                            if (newCenterX >= 0 && newCenterX < canvas.width && newCenterY >= 0 && newCenterY < canvas.height) {
+                                // Check if there's already a cell here
+                                const tooClose = this.cells.some(c => {
+                                    const dx = c.centerX - newCenterX;
+                                    const dy = c.centerY - newCenterY;
+                                    return Math.sqrt(dx * dx + dy * dy) < (this.props.cellSize || 8) * 0.8;
+                                });
+                                
+                                if (!tooClose) {
+                                    this.cells.push({
+                                        centerX: newCenterX,
+                                        centerY: newCenterY,
+                                        radius: 0,
+                                        maxRadius: (this.props.cellSize || 8) + Math.random() * 3
+                                    });
+                                }
+                            }
+                        }
+                    }
+                } else if (this.props.pattern === 'lavaLamp') {
+                    // Lava lamp: blobby, flowing movement
+                    for (let pixel of this.pixels) {
+                        if (Math.random() < this.props.spreadRate * speed * 0.5) {
+                            // Bias growth in the current direction
+                            const angle = Math.atan2(this.growthDirection.y, this.growthDirection.x);
+                            const randomAngle = angle + (Math.random() - 0.5) * Math.PI;
+                            
+                            const dx = Math.round(Math.cos(randomAngle));
+                            const dy = Math.round(Math.sin(randomAngle));
+                            
+                            const newX = pixel.x + dx;
+                            const newY = pixel.y + dy;
+                            
+                            if (newX >= 0 && newX < canvas.width && newY >= 0 && newY < canvas.height) {
+                                if (!this.pixels.some(p => p.x === newX && p.y === newY)) {
+                                    newPixels.push({x: newX, y: newY, age: 0, alpha: 1});
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    // Original growth patterns
+                    for (let pixel of this.pixels) {
+                        if (Math.random() < this.props.spreadRate * speed) {
+                            const directions = [
+                                {dx: 1, dy: 0}, {dx: -1, dy: 0},
+                                {dx: 0, dy: 1}, {dx: 0, dy: -1},
+                                {dx: 1, dy: 1}, {dx: -1, dy: -1},
+                                {dx: 1, dy: -1}, {dx: -1, dy: 1}
+                            ];
+                            
+                            // Pattern-based growth
+                            let direction;
+                            if (this.props.pattern === 'mycelium') {
+                                direction = directions[Math.floor(Math.random() * 4)]; // Cardinal only
+                            } else {
+                                direction = directions[Math.floor(Math.random() * directions.length)];
+                            }
+                            
+                            const newX = pixel.x + direction.dx;
+                            const newY = pixel.y + direction.dy;
+                            
+                            if (newX >= 0 && newX < canvas.width && newY >= 0 && newY < canvas.height) {
+                                if (!this.pixels.some(p => p.x === newX && p.y === newY)) {
+                                    newPixels.push({x: newX, y: newY, age: 0, alpha: 1});
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                this.pixels.push(...newPixels);
+                this.size = this.pixels.length;
+            }
+            
+            draw() {
+                // RGB shift for nematodes
+                if (this.props.rgbShift && this.segments) {
+                    this.baseHue += this.rgbSpeed;
+                    if (this.baseHue >= 360) this.baseHue -= 360;
+                    
+                    // Draw trail particles first (behind worm)
+                    if (this.trail) {
+                        for (let particle of this.trail) {
+                            const alpha = (particle.life / particle.maxLife) * 0.6;
+                            const color = `hsl(${particle.hue}, 100%, 50%)`;
+                            
+                            ctx.globalAlpha = alpha;
+                            
+                            if (particle.sparkle) {
+                                // Sparkle particle - brighter
+                                ctx.fillStyle = 'white';
+                                ctx.fillRect(Math.floor(particle.x), Math.floor(particle.y), 2, 2);
+                            } else {
+                                // Regular colored particle
+                                ctx.fillStyle = color;
+                                ctx.fillRect(Math.floor(particle.x), Math.floor(particle.y), 1, 1);
+                            }
+                        }
+                        ctx.globalAlpha = 1;
+                    }
+                    
+                    // Draw worm segments
+                    for (let i = 0; i < this.segments.length; i++) {
+                        const segment = this.segments[i];
+                        // Gradient along body
+                        const hueOffset = (i / this.segments.length) * 60;
+                        const hue = (this.baseHue + hueOffset) % 360;
+                        const color = `hsl(${hue}, 100%, 50%)`;
+                        
+                        ctx.fillStyle = color;
+                        // Draw thicker segments
+                        ctx.fillRect(Math.floor(segment.x) - 1, Math.floor(segment.y) - 1, 3, 3);
+                    }
+                    return;
+                }
+                
+                // Special rendering for cellular pattern (algae)
+                if (this.props.pattern === 'cellular' && this.cells) {
+                    // Smooth color fade for algae
+                    let fillColor;
+                    if (this.props.smoothFade) {
+                        // Parse hex colors
+                        const color1 = this.props.color;
+                        const color2 = this.props.secondaryColor;
+                        
+                        // Calculate fade amount using sine wave
+                        const fadeSpeed = 0.01;
+                        const fade = (Math.sin(this.age * fadeSpeed) + 1) / 2;
+                        
+                        // Convert hex to RGB
+                        const r1 = parseInt(color1.slice(1, 3), 16);
+                        const g1 = parseInt(color1.slice(3, 5), 16);
+                        const b1 = parseInt(color1.slice(5, 7), 16);
+                        
+                        const r2 = parseInt(color2.slice(1, 3), 16);
+                        const g2 = parseInt(color2.slice(3, 5), 16);
+                        const b2 = parseInt(color2.slice(5, 7), 16);
+                        
+                        // Interpolate between colors
+                        const r = Math.floor(r1 + (r2 - r1) * fade);
+                        const g = Math.floor(g1 + (g2 - g1) * fade);
+                        const b = Math.floor(b1 + (b2 - b1) * fade);
+                        
+                        fillColor = `rgb(${r}, ${g}, ${b})`;
+                    } else {
+                        fillColor = this.age % 20 < 10 ? this.props.color : this.props.secondaryColor;
+                    }
+                    
+                    // Draw filled cells
+                    for (let pixel of this.pixels) {
+                        ctx.fillStyle = fillColor;
+                        ctx.fillRect(pixel.x, pixel.y, 1, 1);
+                    }
+                    
+                    // Draw cell walls/boundaries
+                    ctx.strokeStyle = this.props.secondaryColor;
+                    for (let cell of this.cells) {
+                        if (cell.radius > 2) {
+                            ctx.beginPath();
+                            ctx.arc(cell.centerX, cell.centerY, Math.min(cell.radius, cell.maxRadius), 0, Math.PI * 2);
+                            ctx.stroke();
+                            
+                            // Add a highlight dot in the center
+                            if (cell.radius >= cell.maxRadius * 0.5) {
+                                ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                                ctx.fillRect(Math.floor(cell.centerX), Math.floor(cell.centerY), 2, 2);
+                            }
+                        }
+                    }
+                    return;
+                }
+                
+                // RGB fade for blobs
+                if (this.props.rgbFade) {
+                    const speed = 0.002; // Slow fade speed
+                    const r = Math.floor((Math.sin(this.age * speed) + 1) * 127.5);
+                    const g = Math.floor((Math.sin(this.age * speed + 2) + 1) * 127.5);
+                    const b = Math.floor((Math.sin(this.age * speed + 4) + 1) * 127.5);
+                    
+                    for (let pixel of this.pixels) {
+                        // Create subtle variation per pixel
+                        const pixelVariation = (pixel.x + pixel.y) * 0.01;
+                        const pr = Math.floor((Math.sin(this.age * speed + pixelVariation) + 1) * 127.5);
+                        const pg = Math.floor((Math.sin(this.age * speed + pixelVariation + 2) + 1) * 127.5);
+                        const pb = Math.floor((Math.sin(this.age * speed + pixelVariation + 4) + 1) * 127.5);
+                        
+                        ctx.fillStyle = `rgb(${pr}, ${pg}, ${pb})`;
+                        ctx.fillRect(pixel.x, pixel.y, 1, 1);
+                        
+                        // Add more frequent highlights for shimmer
+                        if (Math.random() < 0.03) {
+                            ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                            ctx.fillRect(pixel.x, pixel.y, 1, 1);
+                        }
+                    }
+                    return;
+                }
+                
+                // Draw with pixel art style
+                for (let pixel of this.pixels) {
+                    const brightness = 0.8 + Math.random() * 0.2;
+                    const colorVariation = this.age % 20 < 10 ? this.props.color : this.props.secondaryColor;
+                    
+                    // Apply alpha for slime mold fading
+                    if (pixel.alpha !== undefined && pixel.alpha < 1) {
+                        ctx.globalAlpha = pixel.alpha;
+                    }
+                    
+                    ctx.fillStyle = colorVariation;
+                    ctx.fillRect(pixel.x, pixel.y, 1, 1);
+                    
+                    // Reset alpha
+                    if (pixel.alpha !== undefined && pixel.alpha < 1) {
+                        ctx.globalAlpha = 1;
+                    }
+                    
+                    // Add occasional highlights
+                    if (Math.random() < 0.02) {
+                        ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                        ctx.fillRect(pixel.x, pixel.y, 1, 1);
+                    }
+                }
+                
+                // Draw smoother glow effect for sparkles with fade
+                if (this.type === 'sparkle') {
+                    const blinkSpeed = this.props.blinkSpeed || 90;
+                    const blinkPhase = ((this.age + this.blinkOffset) % blinkSpeed) / blinkSpeed;
+                    // Smooth sine wave for fading in and out, slower and more random
+                    const glowAlpha = (Math.sin(blinkPhase * Math.PI * 2) + 1) / 2 * 0.6;
+                    
+                    ctx.save();
+                    
+                    // Create radial gradient for faded edge - larger and stronger
+                    const glowRadius = Math.min(50, this.size / 2.5);
+                    const gradient = ctx.createRadialGradient(
+                        this.x, this.y, 0,
+                        this.x, this.y, glowRadius
+                    );
+                    gradient.addColorStop(0, this.props.color);
+                    gradient.addColorStop(0.4, this.props.color + 'AA'); // 66% opacity
+                    gradient.addColorStop(0.7, this.props.color + '60'); // 38% opacity
+                    gradient.addColorStop(1, this.props.color + '00'); // Transparent
+                    
+                    ctx.globalAlpha = glowAlpha;
+                    ctx.fillStyle = gradient;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, glowRadius, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+            }
+        }
+        
+        // Particle class for effects
+        class Particle {
+            constructor(x, y, color, type = 'default') {
+                this.x = x;
+                this.y = y;
+                this.type = type;
+                
+                if (type === 'spore') {
+                    // Spore particles disperse in all directions
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = 0.5 + Math.random() * 1;
+                    this.vx = Math.cos(angle) * speed;
+                    this.vy = Math.sin(angle) * speed;
+                    this.life = 80;
+                    this.maxLife = 80;
+                } else {
+                    this.vx = (Math.random() - 0.5) * 2;
+                    this.vy = (Math.random() - 0.5) * 2;
+                    this.life = 30;
+                    this.maxLife = 30;
+                }
+                
+                this.color = color;
+            }
+            
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                
+                // Spores drift and slow down (no gravity)
+                if (this.type === 'spore') {
+                    this.vx *= 0.98;
+                    this.vy *= 0.98;
+                }
+                
+                this.life--;
+            }
+            
+            draw() {
+                const alpha = this.life / this.maxLife;
+                ctx.fillStyle = this.color;
+                ctx.globalAlpha = alpha;
+                
+                if (this.type === 'spore') {
+                    // Spores are slightly larger
+                    ctx.fillRect(Math.floor(this.x), Math.floor(this.y), 2, 2);
+                } else {
+                    ctx.fillRect(Math.floor(this.x), Math.floor(this.y), 2, 2);
+                }
+                
+                ctx.globalAlpha = 1;
+            }
+        }
+        
+        // Drag and drop functionality
+        document.querySelectorAll('.ingredient').forEach(ingredient => {
+            ingredient.addEventListener('mousedown', startDrag);
+            ingredient.addEventListener('touchstart', startDrag);
+        });
+        
+        function startDrag(e) {
+            e.preventDefault();
+            const type = this.getAttribute('data-type');
+            const emoji = organismTypes[type].emoji;
+            
+            draggedIcon = document.createElement('div');
+            draggedIcon.className = 'dragging';
+            draggedIcon.textContent = emoji;
+            draggedIcon.dataset.type = type;
+            document.body.appendChild(draggedIcon);
+            
+            const moveHandler = (e) => {
+                const clientX = e.clientX || e.touches[0].clientX;
+                const clientY = e.clientY || e.touches[0].clientY;
+                draggedIcon.style.left = clientX + 'px';
+                draggedIcon.style.top = clientY + 'px';
+            };
+            
+            const endHandler = (e) => {
+                const clientX = e.clientX || e.changedTouches[0].clientX;
+                const clientY = e.clientY || e.changedTouches[0].clientY;
+                
+                const rect = canvas.getBoundingClientRect();
+                const x = clientX - rect.left;
+                const y = clientY - rect.top;
+                
+                if (x >= 0 && x < canvas.width && y >= 0 && y < canvas.height) {
+                    addOrganism(x, y, type);
+                    
+                    // Create particle effect
+                    for (let i = 0; i < 10; i++) {
+                        particles.push(new Particle(x, y, organismTypes[type].color));
+                    }
+                }
+                
+                document.removeEventListener('mousemove', moveHandler);
+                document.removeEventListener('touchmove', moveHandler);
+                document.removeEventListener('mouseup', endHandler);
+                document.removeEventListener('touchend', endHandler);
+                
+                if (draggedIcon && draggedIcon.parentNode) {
+                    draggedIcon.parentNode.removeChild(draggedIcon);
+                }
+                draggedIcon = null;
+            };
+            
+            document.addEventListener('mousemove', moveHandler);
+            document.addEventListener('touchmove', moveHandler);
+            document.addEventListener('mouseup', endHandler);
+            document.addEventListener('touchend', endHandler);
+            
+            moveHandler(e);
+        }
+        
+        function addOrganism(x, y, type) {
+            organisms.push(new Organism(x, y, type));
+        }
+        
+        // Control functions
+        function clearDish() {
+            organisms = [];
+            particles = [];
+        }
+        
+        function pauseToggle() {
+            isPaused = !isPaused;
+        }
+        
+        function speedUp() {
+            speed = speed === 0.5 ? 1 : speed === 1 ? 2 : 0.5;
+            const buttons = document.querySelectorAll('.button');
+            buttons[2].textContent = `Speed ${speed}x`;
+        }
+        
+        function showAbout() {
+            document.getElementById('aboutModal').classList.add('active');
+        }
+        
+        function closeAbout() {
+            document.getElementById('aboutModal').classList.remove('active');
+        }
+        
+        // Video Recording (MP4 format)
+        let isRecording = false;
+        let mediaRecorder = null;
+        let recordedChunks = [];
+        
+        function recordGif() {
+            if (isRecording) return;
+            
+            const recordBtn = document.getElementById('recordBtn');
+            
+            try {
+                isRecording = true;
+                recordedChunks = [];
+                
+                recordBtn.textContent = 'Recording...';
+                recordBtn.style.background = 'black';
+                recordBtn.style.color = 'white';
+                
+                // Create a stream from the canvas
+                const stream = canvas.captureStream(30); // 30 FPS
+                
+                // Try MP4 format first, fallback to WebM if not supported
+                let mimeType = 'video/mp4';
+                if (!MediaRecorder.isTypeSupported(mimeType)) {
+                    mimeType = 'video/webm;codecs=h264';
+                    if (!MediaRecorder.isTypeSupported(mimeType)) {
+                        mimeType = 'video/webm';
+                    }
+                }
+                
+                // Create media recorder
+                mediaRecorder = new MediaRecorder(stream, {
+                    mimeType: mimeType,
+                    videoBitsPerSecond: 2500000
+                });
+                
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        recordedChunks.push(event.data);
+                    }
+                };
+                
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(recordedChunks, { type: mimeType });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    // Use .mp4 extension if MP4 format, otherwise use .webm
+                    const extension = mimeType.includes('mp4') ? 'mp4' : 'webm';
+                    a.download = 'petri-dish-' + Date.now() + '.' + extension;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    
+                    recordBtn.textContent = 'Record Findings';
+                    recordBtn.style.background = '';
+                    recordBtn.style.color = '';
+                    isRecording = false;
+                };
+                
+                // Start recording
+                mediaRecorder.start();
+                
+                // Stop after 7 seconds
+                setTimeout(() => {
+                    if (mediaRecorder && mediaRecorder.state === 'recording') {
+                        recordBtn.textContent = 'Processing...';
+                        mediaRecorder.stop();
+                    }
+                }, 7000);
+                
+            } catch (error) {
+                console.error('Recording error:', error);
+                recordBtn.textContent = 'Record Findings';
+                recordBtn.style.background = '';
+                recordBtn.style.color = '';
+                isRecording = false;
+                alert('Recording not supported in this browser. Try Chrome or Firefox.');
+            }
+        }
+        
+        // Close modal when clicking outside
+        document.addEventListener('click', (e) => {
+            const modal = document.getElementById('aboutModal');
+            if (e.target === modal) {
+                closeAbout();
+            }
+        });
+        
+        // Animation loop
+        function animate() {
+            frameCount++;
+            
+            // Clear canvas
+            ctx.fillStyle = '#1a1a1a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw subtle grid
+            ctx.strokeStyle = 'rgba(200, 200, 200, 0.08)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < canvas.width; i += 50) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, canvas.height);
+                ctx.stroke();
+            }
+            for (let i = 0; i < canvas.height; i += 50) {
+                ctx.beginPath();
+                ctx.moveTo(0, i);
+                ctx.lineTo(canvas.width, i);
+                ctx.stroke();
+            }
+            
+            if (!isPaused) {
+                // Update organisms
+                organisms.forEach(organism => {
+                    organism.update(); // Continuous updates (like movement)
+                    organism.grow();   // Growth updates
+                });
+                
+                // Update particles
+                particles = particles.filter(particle => {
+                    particle.update();
+                    return particle.life > 0;
+                });
+            }
+            
+            // Draw everything
+            organisms.forEach(organism => organism.draw());
+            particles.forEach(particle => particle.draw());
+            
+            requestAnimationFrame(animate);
+        }
+        
+        // Start animation
+        animate();
+    </script>
+</body>
+</html>
