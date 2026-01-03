@@ -243,6 +243,7 @@
             margin-bottom: 6px;
             width: 100%;
             text-align: center;
+            color: black;
         }
         
         .button:hover {
@@ -1450,9 +1451,13 @@
                 recordBtn.style.background = 'black';
                 recordBtn.style.color = 'white';
                 
-                // Wait a moment to ensure canvas is fully rendered
+                // Wait longer to ensure canvas is fully rendered and all states are reset
                 setTimeout(() => {
                     try {
+                        // Force canvas state reset
+                        ctx.globalAlpha = 1;
+                        ctx.globalCompositeOperation = 'source-over';
+                        
                         // Create a stream from the canvas
                         const stream = canvas.captureStream(30); // 30 FPS
                         
@@ -1516,7 +1521,7 @@
                         isRecording = false;
                         alert('Recording not supported in this browser. Try Chrome or Firefox.');
                     }
-                }, 200); // 200ms delay to ensure rendering is complete
+                }, 500); // Increased delay to 500ms
                 
             } catch (error) {
                 console.error('Recording error:', error);
