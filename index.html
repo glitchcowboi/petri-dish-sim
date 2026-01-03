@@ -202,6 +202,11 @@
             padding: 6px;
         }
         
+        .ingredients-grid {
+            display: flex;
+            flex-direction: column;
+        }
+        
         .ingredient {
             background: white;
             border: 2px solid black;
@@ -260,12 +265,97 @@
         @media (max-width: 768px) {
             body {
                 font-size: 8px;
+                padding: 10px;
             }
+            
+            .computer-window {
+                max-width: 100%;
+            }
+            
+            .title-bar {
+                padding: 6px 8px;
+                font-size: 10px;
+            }
+            
+            .info-bar {
+                font-size: 7px;
+                padding: 4px;
+                margin-bottom: 8px;
+            }
+            
             .main-container {
                 flex-direction: column;
             }
-            .sidebar {
+            
+            .canvas-container {
+                order: 2;
                 width: 100%;
+                padding: 4px;
+            }
+            
+            #petriDish {
+                width: 100% !important;
+                height: auto !important;
+                max-width: 100%;
+                aspect-ratio: 1;
+            }
+            
+            .sidebar {
+                order: 1;
+                width: 100%;
+                margin: 0;
+                gap: 8px;
+            }
+            
+            .panel-content {
+                padding: 4px;
+            }
+            
+            /* Ingredients in 2x4 grid */
+            .ingredients-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr 1fr;
+                gap: 4px;
+            }
+            
+            .ingredient {
+                padding: 6px 4px;
+                margin-bottom: 0;
+                font-size: 7px;
+                flex-direction: column;
+                text-align: center;
+                gap: 2px;
+            }
+            
+            .ingredient-icon {
+                font-size: 20px;
+            }
+            
+            .ingredient span:last-child {
+                font-size: 6px;
+            }
+            
+            .button {
+                font-size: 7px;
+                padding: 6px;
+            }
+            
+            .panel-title {
+                font-size: 8px;
+                padding: 3px 4px;
+            }
+            
+            .modal-window {
+                width: 95%;
+                max-height: 70vh;
+            }
+            
+            .modal-content {
+                font-size: 8px;
+            }
+            
+            .ingredient-info h3 {
+                font-size: 9px;
             }
         }
     </style>
@@ -295,37 +385,39 @@
                     <div class="panel">
                         <div class="panel-title">Ingredients</div>
                         <div class="panel-content">
-                            <div class="ingredient" data-type="spore">
-                                <span class="ingredient-icon">🍄</span>
-                                <span>Spore</span>
-                            </div>
-                            <div class="ingredient" data-type="crystal">
-                                <span class="ingredient-icon">💎</span>
-                                <span>Crystal</span>
-                            </div>
-                            <div class="ingredient" data-type="bacteria">
-                                <span class="ingredient-icon">🦠</span>
-                                <span>Bacteria</span>
-                            </div>
-                            <div class="ingredient" data-type="algae">
-                                <span class="ingredient-icon">🌿</span>
-                                <span>Algae</span>
-                            </div>
-                            <div class="ingredient" data-type="sparkle">
-                                <span class="ingredient-icon">✨</span>
-                                <span>Sparkle</span>
-                            </div>
-                            <div class="ingredient" data-type="blob">
-                                <span class="ingredient-icon">🫧</span>
-                                <span>Blob</span>
-                            </div>
-                            <div class="ingredient" data-type="slime">
-                                <span class="ingredient-icon">🧫</span>
-                                <span>Slime</span>
-                            </div>
-                            <div class="ingredient" data-type="nematode">
-                                <span class="ingredient-icon">🪱</span>
-                                <span>Nematode</span>
+                            <div class="ingredients-grid">
+                                <div class="ingredient" data-type="spore">
+                                    <span class="ingredient-icon">🍄</span>
+                                    <span>Spore</span>
+                                </div>
+                                <div class="ingredient" data-type="crystal">
+                                    <span class="ingredient-icon">💎</span>
+                                    <span>Crystal</span>
+                                </div>
+                                <div class="ingredient" data-type="bacteria">
+                                    <span class="ingredient-icon">🦠</span>
+                                    <span>Bacteria</span>
+                                </div>
+                                <div class="ingredient" data-type="algae">
+                                    <span class="ingredient-icon">🌿</span>
+                                    <span>Algae</span>
+                                </div>
+                                <div class="ingredient" data-type="sparkle">
+                                    <span class="ingredient-icon">✨</span>
+                                    <span>Sparkle</span>
+                                </div>
+                                <div class="ingredient" data-type="blob">
+                                    <span class="ingredient-icon">🫧</span>
+                                    <span>Blob</span>
+                                </div>
+                                <div class="ingredient" data-type="slime">
+                                    <span class="ingredient-icon">🧫</span>
+                                    <span>Slime</span>
+                                </div>
+                                <div class="ingredient" data-type="nematode">
+                                    <span class="ingredient-icon">🪱</span>
+                                    <span>Nematode</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -353,6 +445,8 @@
                 <div class="modal-close" onclick="closeAbout()"></div>
             </div>
             <div class="modal-content">
+                <p style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid black;">When you are done researching ingredients in your petri dish, click "Record Findings" to download a video record to share with others.</p>
+                
                 <div class="ingredient-info">
                     <h3>🍄 Spore</h3>
                     <p>Grows in a mycelium pattern with straight lines in cardinal directions. Continuously releases floating spore particles that drift and fade away. Reaches medium size and creates a misty atmospheric effect.</p>
@@ -1274,8 +1368,13 @@
                 const clientY = e.clientY || e.changedTouches[0].clientY;
                 
                 const rect = canvas.getBoundingClientRect();
-                const x = clientX - rect.left;
-                const y = clientY - rect.top;
+                
+                // Calculate position relative to canvas, accounting for scaling
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                
+                const x = (clientX - rect.left) * scaleX;
+                const y = (clientY - rect.top) * scaleY;
                 
                 if (x >= 0 && x < canvas.width && y >= 0 && y < canvas.height) {
                     addOrganism(x, y, type);
