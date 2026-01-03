@@ -1244,10 +1244,8 @@
                     ctx.fillStyle = colorVariation;
                     ctx.fillRect(pixel.x, pixel.y, 1, 1);
                     
-                    // Reset alpha
-                    if (pixel.alpha !== undefined && pixel.alpha < 1) {
-                        ctx.globalAlpha = 1;
-                    }
+                    // Always reset alpha before highlights
+                    ctx.globalAlpha = 1;
                     
                     // Add occasional highlights
                     if (Math.random() < 0.02) {
@@ -1580,7 +1578,10 @@
             }
             
             // Draw everything
-            organisms.forEach(organism => organism.draw());
+            organisms.forEach(organism => {
+                organism.draw();
+                ctx.globalAlpha = 1; // Reset alpha after each organism
+            });
             particles.forEach(particle => particle.draw());
             
             requestAnimationFrame(animate);
