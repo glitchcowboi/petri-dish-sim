@@ -1446,63 +1446,77 @@
                 isRecording = true;
                 recordedChunks = [];
                 
-                recordBtn.textContent = 'Recording...';
+                recordBtn.textContent = 'Starting...';
                 recordBtn.style.background = 'black';
                 recordBtn.style.color = 'white';
                 
-                // Create a stream from the canvas
-                const stream = canvas.captureStream(30); // 30 FPS
-                
-                // Try MP4 format first, fallback to WebM if not supported
-                let mimeType = 'video/mp4';
-                if (!MediaRecorder.isTypeSupported(mimeType)) {
-                    mimeType = 'video/webm;codecs=h264';
-                    if (!MediaRecorder.isTypeSupported(mimeType)) {
-                        mimeType = 'video/webm';
-                    }
-                }
-                
-                // Create media recorder
-                mediaRecorder = new MediaRecorder(stream, {
-                    mimeType: mimeType,
-                    videoBitsPerSecond: 2500000
-                });
-                
-                mediaRecorder.ondataavailable = (event) => {
-                    if (event.data.size > 0) {
-                        recordedChunks.push(event.data);
-                    }
-                };
-                
-                mediaRecorder.onstop = () => {
-                    const blob = new Blob(recordedChunks, { type: mimeType });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    // Use .mp4 extension if MP4 format, otherwise use .webm
-                    const extension = mimeType.includes('mp4') ? 'mp4' : 'webm';
-                    a.download = 'petri-dish-' + Date.now() + '.' + extension;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                    
-                    recordBtn.textContent = 'Record Findings';
-                    recordBtn.style.background = '';
-                    recordBtn.style.color = '';
-                    isRecording = false;
-                };
-                
-                // Start recording
-                mediaRecorder.start();
-                
-                // Stop after 7 seconds
+                // Wait a moment to ensure canvas is fully rendered
                 setTimeout(() => {
-                    if (mediaRecorder && mediaRecorder.state === 'recording') {
-                        recordBtn.textContent = 'Processing...';
-                        mediaRecorder.stop();
+                    try {
+                        // Create a stream from the canvas
+                        const stream = canvas.captureStream(30); // 30 FPS
+                        
+                        // Try MP4 format first, fallback to WebM if not supported
+                        let mimeType = 'video/mp4';
+                        if (!MediaRecorder.isTypeSupported(mimeType)) {
+                            mimeType = 'video/webm;codecs=h264';
+                            if (!MediaRecorder.isTypeSupported(mimeType)) {
+                                mimeType = 'video/webm';
+                            }
+                        }
+                        
+                        // Create media recorder
+                        mediaRecorder = new MediaRecorder(stream, {
+                            mimeType: mimeType,
+                            videoBitsPerSecond: 2500000
+                        });
+                        
+                        mediaRecorder.ondataavailable = (event) => {
+                            if (event.data.size > 0) {
+                                recordedChunks.push(event.data);
+                            }
+                        };
+                        
+                        mediaRecorder.onstop = () => {
+                            const blob = new Blob(recordedChunks, { type: mimeType });
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            // Use .mp4 extension if MP4 format, otherwise use .webm
+                            const extension = mimeType.includes('mp4') ? 'mp4' : 'webm';
+                            a.download = 'petri-dish-' + Date.now() + '.' + extension;
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                            URL.revokeObjectURL(url);
+                            
+                            recordBtn.textContent = 'Record Findings';
+                            recordBtn.style.background = '';
+                            recordBtn.style.color = '';
+                            isRecording = false;
+                        };
+                        
+                        // Start recording
+                        mediaRecorder.start();
+                        recordBtn.textContent = 'Recording...';
+                        
+                        // Stop after 7 seconds
+                        setTimeout(() => {
+                            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                                recordBtn.textContent = 'Processing...';
+                                mediaRecorder.stop();
+                            }
+                        }, 7000);
+                        
+                    } catch (error) {
+                        console.error('Recording error:', error);
+                        recordBtn.textContent = 'Record Findings';
+                        recordBtn.style.background = '';
+                        recordBtn.style.color = '';
+                        isRecording = false;
+                        alert('Recording not supported in this browser. Try Chrome or Firefox.');
                     }
-                }, 7000);
+                }, 200); // 200ms delay to ensure rendering is complete
                 
             } catch (error) {
                 console.error('Recording error:', error);
